@@ -24,7 +24,7 @@ export default function LoginPage() {
             localStorage.setItem('nickname', member.nickname);
 
             alert(`${member.nickname}님, 환영합니다!`);
-            window.location.href = '/persona'; // 로그인 후 이동할 페이지
+            window.location.href = '/';
         } else {
             alert('이메일 또는 비밀번호가 일치하지 않습니다.');
         }
