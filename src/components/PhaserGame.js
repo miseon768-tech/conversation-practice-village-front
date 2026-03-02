@@ -36,11 +36,11 @@ export default function PhaserGame({ onSpacePress, personaId }) {
                     const { width, height } = this.scale;
 
                     const counselors = [
-                        { id: 'NPC_01', x: width * 0.2, y: height * 0.3, key: 'char_1', label: '차분한 상담사' },
-                        { id: 'NPC_02', x: width * 0.8, y: height * 0.3, key: 'char_2', label: '열정적인 상담사' },
-                        { id: 'NPC_03', x: width * 0.5, y: height * 0.5, key: 'char_3', label: '냉철한 분석가' },
-                        { id: 'NPC_04', x: width * 0.2, y: height * 0.7, key: 'char_4', label: '친절한 이웃' },
-                        { id: 'NPC_05', x: width * 0.8, y: height * 0.7, key: 'char_5', label: '신비로운 조언자' },
+                        { id: 'NPC_01', x: width * 0.2, y: height * 0.3, key: 'char_1', label: 'READY' },
+                        { id: 'NPC_02', x: width * 0.8, y: height * 0.3, key: 'char_2', label: 'READY' },
+                        { id: 'NPC_03', x: width * 0.5, y: height * 0.5, key: 'char_3', label: 'READY' },
+                        { id: 'NPC_04', x: width * 0.2, y: height * 0.7, key: 'char_4', label: 'READY' },
+                        { id: 'NPC_05', x: width * 0.8, y: height * 0.7, key: 'char_5', label: 'READY' },
                     ];
 
                     this.npcs = this.physics.add.group();
