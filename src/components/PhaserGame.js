@@ -18,20 +18,19 @@ export default function PhaserGame({ onSpacePress, personaId }) {
             physics: { default: 'arcade', arcade: { debug: false } },
             scene: {
                 preload: function() {
-                    // ⭐️ [검증됨] 현재 작동하는 사람/캐릭터 형태의 이미지들만 모았습니다.
                     // 나(플레이어)
                     this.load.image('player', 'https://labs.phaser.io/assets/sprites/phaser-dude.png');
 
-                    // 주민 1: 우주복 입은 사람 (기존 nanovisor 대체)
-                    this.load.image('char_1', 'https://labs.phaser.io/assets/sprites/space-baddie.png');
-                    // 주민 2: 꼬마 캐릭터 (기존 red_balloon 대체)
-                    this.load.image('char_2', 'https://labs.phaser.io/assets/sprites/ayu.png');
-                    // 주민 3: 고전 게임 스타일 캐릭터 (기존 exocet 대체)
+                    // 주민 1
+                    this.load.image('char_1', 'https://labs.phaser.io/assets/sprites/orange-cat1.png');
+                    // 주민 2
+                    this.load.image('char_2', 'https://labs.phaser.io/assets/sprites/orange-cat2.png');
+                    // 주민 3
                     this.load.image('char_3', 'https://labs.phaser.io/assets/sprites/orange-cat1.png');
-                    // 주민 4: 작고 귀여운 캐릭터 (tinycar는 작동하므로 유지)
-                    this.load.image('char_4', 'https://labs.phaser.io/assets/sprites/tinycar.png');
-                    // 주민 5: 사람 형태의 슬라임 캐릭터
-                    this.load.image('char_5', 'https://labs.phaser.io/assets/sprites/slime.png');
+                    // 주민 4
+                    this.load.image('char_4', 'https://labs.phaser.io/assets/sprites/orange-cat1.png');
+                    // 주민 5
+                    this.load.image('char_5', 'https://labs.phaser.io/assets/sprites/orange-cat2.png');
                 },
                 create: function() {
                     const { width, height } = this.scale;
