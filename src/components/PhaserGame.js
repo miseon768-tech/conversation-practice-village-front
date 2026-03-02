@@ -36,11 +36,11 @@ export default function PhaserGame({ onSpacePress, personaId }) {
                     const { width, height } = this.scale;
 
                     const counselors = [
-                        { id: 'NPC_01', x: width * 0.2, y: height * 0.3, key: 'char_1', label: 'READY' },
-                        { id: 'NPC_02', x: width * 0.8, y: height * 0.3, key: 'char_2', label: 'READY' },
-                        { id: 'NPC_03', x: width * 0.5, y: height * 0.5, key: 'char_3', label: 'READY' },
-                        { id: 'NPC_04', x: width * 0.2, y: height * 0.7, key: 'char_4', label: 'READY' },
-                        { id: 'NPC_05', x: width * 0.8, y: height * 0.7, key: 'char_5', label: 'READY' },
+                        { id: 'NPC_01', x: width * 0.2, y: height * 0.3, key: 'char_1', label: 'NPC_01' },
+                        { id: 'NPC_02', x: width * 0.8, y: height * 0.3, key: 'char_2', label: 'NPC_02' },
+                        { id: 'NPC_03', x: width * 0.5, y: height * 0.5, key: 'char_3', label: 'NPC_03' },
+                        { id: 'NPC_04', x: width * 0.2, y: height * 0.7, key: 'char_4', label: 'NPC_04' },
+                        { id: 'NPC_05', x: width * 0.8, y: height * 0.7, key: 'char_5', label: 'NPC_05' },
                     ];
 
                     this.npcs = this.physics.add.group();
