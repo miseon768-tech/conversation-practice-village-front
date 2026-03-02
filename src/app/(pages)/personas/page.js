@@ -1,106 +1,189 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+import DialogueBox from '../components/DialogueBox';
 
-export default function PersonaList() {
-    const [personas, setPersonas] = useState([]);
-    const [loading, setLoading] = useState(true);
+// Phaser 컴포넌트 (SSR 방지)
+const PhaserGame = dynamic(() => import('../components/PhaserGame'), { ssr: false });
+
+export default function Home() {
     const router = useRouter();
 
-    // 1. 페이지 로드 시 내가 만든 페르소나 목록 불러오기
+    // 1. 상태 관리
+    const [mode, setMode] = useState('EXPLORE'); // EXPLORE(탐색), CREATE(인격생성), TALK(대화확인)
+    const [targetPersonaId, setTargetPersonaId] = useState(null);
+    const [targetNpcId, setTargetNpcId] = useState(null);
+    const [dialogueText, setDialogueText] = useState('');
+    const [currentMemberId, setCurrentMemberId] = useState(null);
+    const [nickname, setNickname] = useState('');
+
+    // 인격 생성을 위한 폼 데이터 (DB 컬럼과 100% 매칭)
+    const [formData, setFormData] = useState({
+        name: '',
+        age: 20,
+        job: '',
+        mbti: 'INFJ',
+        relationship_type: '비밀 상담사',
+        personality_keywords: '',
+        speech_style: ''
+    });
+
+    // 2. 초기 인증 체크 (추후 JWT 도입 시 이 부분이 토큰 검증 로직으로 교체됩니다)
     useEffect(() => {
-        fetch('/api/personas?memberId=1') // 실제 환경에선 로그인된 유저 ID 사용
-            .then(res => res.json())
-            .then(data => {
-                setPersonas(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error("데이터 로딩 실패:", err);
-                setLoading(false);
-            });
-    }, []);
+        const savedMemberId = localStorage.getItem('memberId');
+        const savedNickname = localStorage.getItem('nickname');
 
-    // ⭐️ 2. 캐릭터 클릭 시: 방 생성 -> 방 번호 획득 -> 채팅 페이지 이동
-    const handleCharacterClick = async (personaId) => {
-        try {
-            // 백엔드 컨트롤러 (@PostMapping("/persona/{personaId}")) 사양에 맞춤
-            const res = await fetch(`/api/conversations/persona/${personaId}`, {
-                method: 'POST'
-                // 백엔드에서 @RequestBody를 받지 않으므로 headers와 body는 생략 가능합니다.
-            });
+        if (!savedMemberId) {
+            router.replace('/members/login');
+        } else {
+            setCurrentMemberId(Number(savedMemberId));
+            setNickname(savedNickname);
+        }
+    }, [router]);
 
-            if (!res.ok) {
-                const errorMsg = await res.text();
-                throw new Error(errorMsg || "방 생성 실패");
-            }
+    // 3. Phaser에서 유령과 접촉 시 실행
+    const handleInteraction = (personaId, npcId) => {
+        setTargetNpcId(npcId);
 
-            // 백엔드에서 생성된 Conversation ID (Long 타입)를 받아옴
-            const conversationId = await res.json();
-
-            // 3. 해당 방 번호를 주소에 담아 대화 페이지(게임 화면)로 즉시 이동
-            // 예: /conversations/15
-            router.push(`/conversations/${conversationId}`);
-
-        } catch (err) {
-            console.error("대화 시작 에러:", err);
-            alert("해당 주민과 대화방을 만들 수 없습니다. 잠시 후 다시 시도해주세요!");
+        if (!personaId) {
+            // 인격이 없는 유령이면 생성 모드로
+            setMode('CREATE');
+        } else {
+            // 인격이 이미 존재하면 대화 확인 모드로
+            setTargetPersonaId(personaId);
+            setDialogueText(`비밀 상담사 [${npcId}]와 대화를 시작할까요?`);
+            setMode('TALK');
         }
     };
 
-    if (loading) return <div style={containerStyle}>마을 주민들을 불러오는 중...</div>;
+    // 4. 인격 생성 요청 (상담사 등록)
+    const onCreatePersona = async (e) => {
+        e.preventDefault();
+
+        // 백엔드 전송 전 필수값 검증
+        if (!currentMemberId || !targetNpcId) {
+            alert("세션 정보가 만료되었습니다. 다시 로그인해주세요.");
+            return;
+        }
+
+        try {
+            // ⭐️ 나중에 JWT를 쓰게 되면 headers에 Authorization: `Bearer ${token}`을 추가하게 됩니다.
+            const res = await fetch(`/api/personas`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    memberId: currentMemberId, // ⭐️ JWT 도입 후에는 백엔드에서 처리 가능
+                    npc_id: targetNpcId,      // ⭐️ 유니크 식별자
+                    ...formData
+                })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || "상담사 등록 중 오류가 발생했습니다.");
+            }
+
+            setTargetPersonaId(data.id);
+            setDialogueText(`상담사 ${formData.name}가 배정되었습니다. 비밀을 지켜드릴게요.`);
+            setMode('TALK');
+
+            // 2초 뒤 새로고침하여 Phaser 상태 동기화
+            setTimeout(() => window.location.reload(), 2000);
+
+        } catch (err) {
+            console.error("생성 에러:", err);
+            alert(err.message);
+        }
+    };
+
+    if (!currentMemberId) return <div style={{ backgroundColor: '#1a1a1a', height: '100vh' }} />;
 
     return (
-        <div style={containerStyle}>
-            <header style={headerStyle}>
-                <h1>🏡 우리 마을 주민 명부</h1>
-                <button
-                    onClick={() => router.push('/personas/create')}
-                    style={addButtonStyle}
-                >
-                    + 새 주민 초대하기
-                </button>
-            </header>
+        <main style={{ position: 'fixed', width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
 
-            <div style={gridStyle}>
-                {personas.length > 0 ? (
-                    personas.map(p => (
-                        <div
-                            key={p.id}
-                            style={cardStyle}
-                            onClick={() => handleCharacterClick(p.id)} // 카드 클릭 시 대화 시작
-                        >
-                            <div style={avatarStyle}>
-                                {p.name ? p.name[0] : '👤'}
-                            </div>
-                            <h3 style={nameStyle}>{p.name}</h3>
-                            <p style={relStyle}>
-                                {p.relationship_type || p.relationshipType || '동네 주민'}
-                            </p>
-                            <div style={statStyle}>
-                                ❤️ {p.intimacy_score || 0} | 🤝 {p.trust_score || 0}
-                            </div>
-                            <button style={btnStyle}>대화하기</button>
-                        </div>
-                    ))
-                ) : (
-                    <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px' }}>
-                        <p>아직 마을에 주민이 없어요. 새로운 주민을 초대해보세요!</p>
-                    </div>
-                )}
+            {/* 상단 인터페이스: 칙칙함을 줄이기 위한 반투명 스타일링 */}
+            <div style={userTagStyle}>
+                <span style={{ color: '#4ade80' }}>●</span> {nickname}님의 비밀 상담실
             </div>
-        </div>
+
+            {/* 게임 캔버스 영역 */}
+            <PhaserGame onSpacePress={handleInteraction} personaId={targetPersonaId} />
+
+            {/* 인격 생성 UI: 모달 스타일 */}
+            {mode === 'CREATE' && (
+                <div style={retroContainerStyle}>
+                    <div style={nameTagStyle}>🤫 신규 비밀 상담사 배정 [{targetNpcId}]</div>
+                    <p style={{ color: '#aaa', fontSize: '12px', marginBottom: '15px' }}>
+                        이 상담사와의 대화는 오직 사용자님께만 공개됩니다.
+                    </p>
+
+                    <form onSubmit={onCreatePersona} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>상담사 이름</label>
+                            <input required style={retroInputStyle} placeholder="상담사의 별명을 지어주세요"
+                                   onChange={e => setFormData({...formData, name: e.target.value})} />
+                        </div>
+
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>말투 설정</label>
+                            <input style={retroInputStyle} placeholder="예: 차분한 존댓말, 친근한 반말"
+                                   onChange={e => setFormData({...formData, speech_style: e.target.value})} />
+                        </div>
+
+                        <div style={inputGroupStyle}>
+                            <label style={labelStyle}>상담 키워드</label>
+                            <textarea style={{...retroInputStyle, height: '60px'}} placeholder="예: 진로 고민, 연애 상담 전문"
+                                      onChange={e => setFormData({...formData, personality_keywords: e.target.value})} />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
+                            <button type="submit" style={retroButtonStyle}>상담 시작하기</button>
+                            <button type="button" onClick={() => setMode('EXPLORE')}
+                                    style={{...retroButtonStyle, backgroundColor: '#444'}}>취소</button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {/* 하단 대화창 컴포넌트 */}
+            <DialogueBox
+                text={dialogueText}
+                isOpen={mode === 'TALK'}
+                onClose={() => setMode('EXPLORE')}
+                npcName={formData.name || "비밀 상담사"}
+            />
+        </main>
     );
 }
 
-// --- 디자인 스타일 (포켓몬/깔끔한 RPG 감성) ---
-const containerStyle = { padding: '40px', maxWidth: '1000px', margin: '0 auto' };
-const headerStyle = { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px', borderBottom: '3px solid #333', paddingBottom: '10px' };
-const addButtonStyle = { padding: '10px 20px', backgroundColor: '#2196F3', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' };
-const gridStyle = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '25px' };
-const cardStyle = { border: '2px solid #333', padding: '25px', borderRadius: '15px', cursor: 'pointer', textAlign: 'center', backgroundColor: '#fff', transition: 'transform 0.2s', boxShadow: '5px 5px 0px #333' };
-const avatarStyle = { width: '70px', height: '70px', backgroundColor: '#eee', borderRadius: '50%', margin: '0 auto 15px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '30px', border: '2px solid #333' };
-const nameStyle = { margin: '10px 0', fontSize: '22px', color: '#333' };
-const relStyle = { color: '#666', fontSize: '14px', marginBottom: '10px' };
-const statStyle = { fontSize: '12px', color: '#888', marginBottom: '15px' };
-const btnStyle = { width: '100%', padding: '10px', backgroundColor: '#000', color: '#fff', border: 'none', borderRadius: '5px', cursor: 'pointer', fontWeight: 'bold' };
+// --- 스타일 가이드 (칙칙함을 제거한 다크 테마) ---
+
+const userTagStyle = {
+    position: 'absolute', top: 20, right: 20, color: 'white', zIndex: 1000,
+    backgroundColor: 'rgba(0,0,0,0.7)', padding: '12px 20px', borderRadius: '30px',
+    border: '1px solid #333', fontSize: '14px', fontWeight: '500', backdropFilter: 'blur(5px)'
+};
+
+const retroContainerStyle = {
+    position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
+    width: '450px', backgroundColor: '#18181b', border: '1px solid #3f3f46',
+    padding: '30px', zIndex: 2000, color: '#fff', borderRadius: '12px',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.5)'
+};
+
+const nameTagStyle = { color: '#facc15', marginBottom: '5px', fontWeight: 'bold', fontSize: '18px' };
+const inputGroupStyle = { display: 'flex', flexDirection: 'column', gap: '5px' };
+const labelStyle = { fontSize: '12px', color: '#94a3b8', fontWeight: '600' };
+
+const retroInputStyle = {
+    backgroundColor: '#09090b', color: '#fff', border: '1px solid #27272a',
+    padding: '12px', fontSize: '14px', borderRadius: '6px', outline: 'none'
+};
+
+const retroButtonStyle = {
+    flex: 1, padding: '12px', backgroundColor: '#10b981', color: '#fff',
+    border: 'none', cursor: 'pointer', fontWeight: 'bold', borderRadius: '6px',
+    transition: 'background 0.2s'
+};
