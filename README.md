@@ -392,11 +392,61 @@ const PhaserGame = dynamic(() => import('../components/PhaserGame'), {
 });
 ```
 
-### 3. "Failed to fetch" 에러
+### 3. "Failed to fetch" 에러 / AI 대화가 작동하지 않음 ⚠️
 
-**증상:** 브라우저 콘솔에 `TypeError: Failed to fetch` 에러 표시
+**증상:** 
+- 브라우저 콘솔에 `TypeError: Failed to fetch` 에러 표시
+- NPC와 대화 시 응답이 없음
+- "음... 갑자기 마을에 통신 장애가 생겼나 봐" 메시지
+- CORS 에러 (Access to fetch blocked by CORS policy)
+
+**원인:**
+1. **백엔드 서버가 실행되지 않음** (가장 흔한 원인)
+2. **백엔드에서 GEMINI_API_KEY가 설정되지 않음** ⚠️
+3. CORS 설정 문제
+4. 네트워크 연결 문제
 
 **해결 방법:**
+
+#### ✅ 1단계: 백엔드 서버 확인
+```bash
+# 8080 포트 확인
+lsof -i :8080
+
+# 실행 중이 아니면 백엔드 시작
+cd conversation-practice-village-back
+./run-dev.sh
+```
+
+#### ✅ 2단계: GEMINI_API_KEY 설정 확인 (중요!)
+```bash
+# 백엔드 디렉토리에서 확인
+cd conversation-practice-village-back
+
+# 환경변수 확인
+echo $GEMINI_API_KEY
+
+# 없으면 설정
+# .env.example을 .env로 복사하고 API 키 입력
+cp .env.example .env
+nano .env
+
+# API 키 발급: https://aistudio.google.com/app/apikey
+```
+
+**⚠️ GEMINI_API_KEY가 없으면 AI 대화가 작동하지 않습니다!**
+
+#### ✅ 3단계: 백엔드 재시작
+```bash
+# 환경변수 로드 후 서버 재시작
+source .env
+./gradlew bootRun
+
+# 또는 실행 스크립트 사용
+./run-dev.sh
+```
+
+#### ✅ 4단계: 프론트엔드 확인
 
 #### ✅ API 경로 확인
 ```javascript

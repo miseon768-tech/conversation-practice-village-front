@@ -27,7 +27,7 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
         setIsLoading(true);
 
         try {
-            // 1. 대화방 ID 확보 (기존 로직 동일)
+            // 1. 대화방 ID 확보
             let currentId = conversationId;
 
             if (!currentId) {
@@ -40,7 +40,7 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
                 setConversationId(currentId);
             }
 
-            // 2. 메시지 전송 (백엔드 컨트롤러 주소 /api/messages/{id} 에 맞춤)
+            // 2. 메시지 전송 (백엔드 ChatResponse.reply 필드와 매칭)
             const res = await fetch(`http://localhost:8080/api/messages/${currentId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -49,9 +49,11 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
 
             if (res.ok) {
                 const data = await res.json();
-                // 백엔드 ChatResponse의 필드명(예: answer 또는 content)에 맞춰 수정하세요.
-                // 아래는 일반적인 관례인 .answer 또는 .content를 예시로 둡니다.
-                setDisplayText(data.answer || data.content || data.response || "주민이 대답을 마쳤습니다.");
+
+                // 에러 발생 지점 수정: data.reply가 있으면 사용하고, 53번 줄 중복 코드는 삭제함
+                const aiReply = data.reply || "주민이 대답을 마쳤습니다.";
+                setDisplayText(aiReply);
+
             } else {
                 setDisplayText("아, 말이 안 통하네요... (서버 응답 에러)");
             }
@@ -77,6 +79,7 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
             <div style={nameTagStyle}>[ {npcName} ]</div>
 
             <div style={contentStyle}>
+                {/* key를 displayText로 주어 텍스트가 바뀔 때마다 다시 타이핑 효과 발생 */}
                 <Typewriter
                     key={displayText}
                     options={{
@@ -111,7 +114,7 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
     );
 }
 
-// --- 스타일 정의 생략 ---
+// --- 스타일 정의 (기존과 동일) ---
 const containerStyle = { position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: '740px', minHeight: '200px', backgroundColor: 'rgba(20, 20, 25, 0.95)', border: '4px solid #ffffff', borderRadius: '4px', color: '#ffffff', padding: '25px', fontSize: '22px', fontFamily: '"Press Start 2P", monospace', zIndex: 1000, boxShadow: '0 0 0 4px #000, 0 10px 20px rgba(0,0,0,0.5)' };
 const nameTagStyle = { color: '#ffcc00', marginBottom: '12px', fontWeight: 'bold', fontSize: '18px' };
 const contentStyle = { lineHeight: '1.5', minHeight: '60px', marginBottom: '15px' };
