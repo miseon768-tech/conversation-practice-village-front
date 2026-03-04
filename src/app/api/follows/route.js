@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = 'http://localhost:8080/api/follows';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
 // [POST] 팔로우 (RequestParam 방식)
 export async function POST(request) {

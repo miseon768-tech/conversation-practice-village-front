@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-const BACKEND_URL = 'http://localhost:8080/api/conversations';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
 // [POST] 새로운 대화 세션 생성
 export async function POST(request, { params }) {

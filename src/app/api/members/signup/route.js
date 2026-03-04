@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-const BACKEND_URL = 'http://localhost:8080/api/members';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
 // 회원 가입
 export async function POST(request) {

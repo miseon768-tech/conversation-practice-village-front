@@ -31,7 +31,7 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
             let currentId = conversationId;
 
             if (!currentId) {
-                const convRes = await fetch(`http://localhost:8080/api/conversations/persona/${personaId}`, {
+                const convRes = await fetch(`/api/conversations/persona/${personaId}`, {
                     method: 'POST',
                 });
                 if (!convRes.ok) throw new Error("대화방 세션 확보 실패");
@@ -41,7 +41,7 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
             }
 
             // 2. 메시지 전송 (백엔드 ChatResponse.reply 필드와 매칭)
-            const res = await fetch(`http://localhost:8080/api/messages/${currentId}`, {
+            const res = await fetch(`/api/messages/${currentId}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: messageToSend })

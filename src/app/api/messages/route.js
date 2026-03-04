@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const BACKEND_URL = 'http://localhost:8080/api/messages';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
 // [POST] 특정 페르소나에게 메시지 보내고 AI 응답 받기
 export async function POST(request) {
@@ -20,7 +20,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const conversationId = searchParams.get('conversationId');
 
-    const res = await fetch(`${BACKEND_URL}/${conversationId}`, { cache: 'no-store' });
+    const res = await fetch(`${BACKEND_URL}/api/messages/${conversationId}`, { cache: 'no-store' });
     const data = await res.json();
     return NextResponse.json(data);
 }

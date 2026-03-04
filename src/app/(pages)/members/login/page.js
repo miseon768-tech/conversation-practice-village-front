@@ -9,7 +9,8 @@ export default function LoginPage() {
         e.preventDefault();
 
         // 1. 내가 만든 Next.js API(/api/members/login)를 호출합니다.
-        const res = await fetch('http://localhost:3000/api/members/login', {
+        // 상대 경로 사용으로 EC2 환경에서도 동작
+        const res = await fetch('/api/members/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(form),
@@ -61,7 +62,7 @@ export default function LoginPage() {
                 </button>
             </form>
             <p style={{ marginTop: '20px', fontSize: '14px' }}>
-                처음 오셨나요? <a href="http://localhost:3000/members/signup">주민 등록하기</a>
+                처음 오셨나요? <a href="/members/signup">주민 등록하기</a>
             </p>
         </div>
     );

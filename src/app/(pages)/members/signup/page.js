@@ -22,7 +22,7 @@ export default function SignupPage() {
 
         if (res.ok) {
             alert('주민 등록이 완료되었습니다! 로그인 페이지로 이동합니다.');
-            window.location.href = 'http://localhost:3000/members/login'; // 성공 시 로그인 페이지로 이동
+            window.location.href = '/members/login'; // 성공 시 로그인 페이지로 이동
         } else {
             alert('등록에 실패했습니다. 다시 확인해주세요.');
         }
@@ -64,7 +64,7 @@ export default function SignupPage() {
             </form>
 
             <p style={{ marginTop: '20px', fontSize: '14px' }}>
-                이미 계정이 있으신가요? <a href="http://localhost:3000/members/login">로그인하기</a>
+                이미 계정이 있으신가요? <a href="/members/login">로그인하기</a>
             </p>
         </div>
     );
