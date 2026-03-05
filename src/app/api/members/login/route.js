@@ -1,6 +1,16 @@
 import { NextResponse } from 'next/server';
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
 
+async function parseBackendBodySafely(res) {
+    const text = await res.text();
+    if (!text) return null;
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        return { message: text };
+    }
+}
 
 // 로그인
 export async function POST(request) {
@@ -15,15 +25,16 @@ export async function POST(request) {
             body: JSON.stringify(memberData),
         });
 
+        const payload = await parseBackendBodySafely(res);
+
         if (!res.ok) {
-            const errorData = await res.json();
-            console.error('백엔드 에러:', errorData);
-            return NextResponse.json(errorData, { status: res.status });
+            const message = payload?.message || payload?.error || '로그인 실패. 이메일 또는 비밀번호를 확인하세요.';
+            console.error('백엔드 에러:', payload);
+            return NextResponse.json({ error: message, backend: payload }, { status: res.status });
         }
 
-        const data = await res.json();
-        console.log('로그인 성공:', data.email);
-        return NextResponse.json(data);
+        console.log('로그인 성공:', payload?.email);
+        return NextResponse.json(payload ?? {});
     } catch (error) {
         console.error('API 에러:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });
