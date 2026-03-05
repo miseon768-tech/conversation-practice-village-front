@@ -6,7 +6,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:808
 export async function POST(request) {
     const { conversationId, message } = await request.json();
 
-    const res = await fetch(`${BACKEND_URL}/${conversationId}`, {
+    const res = await fetch(`${BACKEND_URL}/api/messages/${conversationId}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message }),

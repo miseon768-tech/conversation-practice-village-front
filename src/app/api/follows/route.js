@@ -6,7 +6,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:808
 export async function POST(request) {
     const { followerId, followingId } = await request.json();
 
-    const res = await fetch(`${BACKEND_URL}?followerId=${followerId}&followingId=${followingId}`, {
+    const res = await fetch(`${BACKEND_URL}/api/follows?followerId=${followerId}&followingId=${followingId}`, {
         method: 'POST',
     });
     return NextResponse.json({ success: res.ok });

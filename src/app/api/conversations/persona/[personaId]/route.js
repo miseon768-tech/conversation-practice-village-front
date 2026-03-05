@@ -26,7 +26,7 @@ export async function GET(request, { params }) {
     const { personaId } = params;
 
     try {
-        const res = await fetch(`${BACKEND_URL}/persona/${personaId}`, {
+        const res = await fetch(`${BACKEND_URL}/api/conversations/persona/${personaId}`, {
             cache: 'no-store'
         });
 

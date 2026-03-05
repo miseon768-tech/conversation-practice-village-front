@@ -15,7 +15,7 @@ export async function GET(request) {
             );
         }
 
-        const res = await fetch(`${BACKEND_URL}/member/${memberId}`, {
+        const res = await fetch(`${BACKEND_URL}/api/personas/member/${memberId}`, {
             method: 'GET',
             headers: { 'Content-Type': 'application/json' },
         });
