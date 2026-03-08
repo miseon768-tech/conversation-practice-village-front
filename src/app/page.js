@@ -86,12 +86,22 @@ export default function Home() {
         }
     };
 
+    // 4. 로그아웃 함수
+    const handleLogout = () => {
+        localStorage.removeItem('memberId');
+        localStorage.removeItem('nickname');
+        router.replace('/members/login');
+    };
+
     if (!currentMemberId) return null;
 
     return (
         <main style={{ position: 'fixed', width: '100vw', height: '100vh', overflow: 'hidden', backgroundColor: '#000' }}>
             {/* 상단바 */}
-            <div style={topBarStyle}>🏡 {nickname}님의 마을</div>
+            <div style={topBarStyle}>
+                <span>🏡 {nickname}님의 마을</span>
+                <button onClick={handleLogout} style={logoutButtonStyle}>로그아웃</button>
+            </div>
 
             {/* 게임 화면 */}
             <PhaserGame onSpacePress={handleInteraction} memberId={currentMemberId} />
@@ -129,7 +139,8 @@ export default function Home() {
 }
 
 // 간단 스타일링
-const topBarStyle = { position: 'absolute', top: 20, right: 20, color: 'white', zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.6)', padding: '10px 20px', borderRadius: '30px' };
+const topBarStyle = { position: 'absolute', top: 20, right: 20, color: 'white', zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.6)', padding: '10px 20px', borderRadius: '30px', display: 'flex', alignItems: 'center', gap: '15px' };
+const logoutButtonStyle = { padding: '5px 15px', backgroundColor: '#f44336', color: 'white', border: 'none', borderRadius: '15px', cursor: 'pointer', fontSize: '14px', fontWeight: 'bold' };
 const villageContainerStyle = { position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: '350px', backgroundColor: '#1b261b', border: '3px solid #4caf50', padding: '20px', zIndex: 2000, borderRadius: '15px', color: 'white' };
 const villageTitleStyle = { fontSize: '18px', color: '#4caf50', marginBottom: '15px', textAlign: 'center' };
 const villageInputStyle = { width: '100%', backgroundColor: '#000', color: '#fff', border: '1px solid #333', padding: '10px', borderRadius: '5px' };
