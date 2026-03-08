@@ -10,7 +10,7 @@ export async function POST(request) {
 
         const res = await fetch(`${BACKEND_URL}/api/members`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {'Content-Type': 'application/json'},
             body: JSON.stringify(memberData),
         });
 
@@ -19,7 +19,7 @@ export async function POST(request) {
         if (!res.ok) {
             const errorData = await res.json();
             console.error('백엔드 에러:', errorData);
-            return NextResponse.json(errorData, { status: res.status });
+            return NextResponse.json(errorData, {status: res.status});
             const message = payload?.message || payload?.error || '회원가입 실패. 입력값을 다시 확인하세요.';
         }
 
@@ -30,4 +30,5 @@ export async function POST(request) {
         const data = await res.json();
         console.log('회원가입 성공:', data.email);
         return NextResponse.json(data);
+    }
 }
