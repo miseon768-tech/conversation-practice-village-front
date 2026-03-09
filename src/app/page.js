@@ -47,7 +47,7 @@ export default function Home() {
             setMode('TALK');
 
             try {
-                const res = await fetch(`http://localhost:3000/api/personas/${personaId}`);
+                const res = await fetch(`/api/personas/${personaId}`);
                 if (res.ok) {
                     const data = await res.json();
                     setFormData(data);
