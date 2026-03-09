@@ -44,7 +44,7 @@ export async function POST(request) {
         const body = await request.json();
 
         // 모든 데이터(npcId 포함)를 백엔드로 전송
-        const res = await fetch(BACKEND_URL, {
+        const res = await fetch(`${BACKEND_URL}/api/personas`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body),
