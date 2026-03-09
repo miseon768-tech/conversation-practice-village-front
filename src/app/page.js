@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import DialogueBox from '../components/DialogueBox';
@@ -9,6 +9,7 @@ const PhaserGame = dynamic(() => import('../components/PhaserGame'), { ssr: fals
 
 export default function Home() {
     const router = useRouter();
+    const dialogueBoxRef = useRef(null);
 
     // 상태 관리
     const [mode, setMode] = useState('EXPLORE'); // EXPLORE, CREATE, TALK
@@ -93,6 +94,20 @@ export default function Home() {
         router.replace('/members/login');
     };
 
+    // 5. 엔터 키로 대화창 입력 필드 포커스
+    useEffect(() => {
+        const handleEnterKey = (e) => {
+            if (e.key === 'Enter' && mode === 'TALK') {
+                dialogueBoxRef.current?.focusInput();
+            }
+        };
+
+        window.addEventListener('keydown', handleEnterKey);
+        return () => {
+            window.removeEventListener('keydown', handleEnterKey);
+        };
+    }, [mode]);
+
     if (!currentMemberId) return null;
 
     return (
@@ -128,6 +143,7 @@ export default function Home() {
 
             {/* 대화창 */}
             <DialogueBox
+                ref={dialogueBoxRef}
                 text={dialogueText}
                 isOpen={mode === 'TALK'}
                 onClose={() => setMode('EXPLORE')}

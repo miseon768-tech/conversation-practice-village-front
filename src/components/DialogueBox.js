@@ -1,10 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import Typewriter from 'typewriter-effect';
 
-export default function DialogueBox({ text, isOpen, onClose, npcName = "주민", personaId }) {
+const DialogueBox = forwardRef(function DialogueBox({ text, isOpen, onClose, npcName = "주민", personaId }, ref) {
     const [userMessage, setUserMessage] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [displayText, setDisplayText] = useState(text);
+    const inputRef = useRef(null);
+
+    // 외부에서 포커스를 줄 수 있도록 함수 노출
+    useImperativeHandle(ref, () => ({
+        focusInput: () => {
+            inputRef.current?.focus();
+        }
+    }));
 
     // 현재 페르소나와 연결된 대화방 ID 저장
     const [conversationId, setConversationId] = useState(null);
@@ -16,6 +24,11 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
             // 대화창을 닫았다 열었을 때 기존 대화방을 유지하고 싶다면
             // setConversationId(null)을 지워주세요.
             setConversationId(null);
+
+            // 입력 필드에 포커스
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
         }
     }, [isOpen, text]);
 
@@ -109,12 +122,15 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
                         autoStart: true,
                         delay: 30,
                         cursor: "▼",
+                        loop: false,
+                        deleteSpeed: Infinity,
                     }}
                 />
             </div>
 
             <div style={inputContainerStyle}>
                 <textarea
+                    ref={inputRef}
                     value={userMessage}
                     onChange={(e) => setUserMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -135,7 +151,9 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
             </div>
         </>
     );
-}
+});
+
+export default DialogueBox;
 
 // --- 스타일 정의 (기존과 동일) ---
 const overlayStyle = { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999 };
