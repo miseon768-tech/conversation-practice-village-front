@@ -19,6 +19,23 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
         }
     }, [isOpen, text]);
 
+    // ESC 키로 닫기
+    useEffect(() => {
+        const handleEscKey = (e) => {
+            if (e.key === 'Escape' && isOpen) {
+                onClose();
+            }
+        };
+
+        if (isOpen) {
+            window.addEventListener('keydown', handleEscKey);
+        }
+
+        return () => {
+            window.removeEventListener('keydown', handleEscKey);
+        };
+    }, [isOpen, onClose]);
+
     const handleSendMessage = async () => {
         if (!userMessage.trim() || isLoading) return;
 
@@ -75,8 +92,13 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
     if (!isOpen) return null;
 
     return (
-        <div style={containerStyle} onClick={(e) => e.stopPropagation()}>
-            <div style={nameTagStyle}>[ {npcName} ]</div>
+        <>
+            {/* 배경 오버레이 - 클릭 시 닫기 */}
+            <div style={overlayStyle} onClick={onClose} />
+
+            {/* 대화창 본체 - 클릭 이벤트 전파 방지 */}
+            <div style={containerStyle} onClick={(e) => e.stopPropagation()}>
+                <div style={nameTagStyle}>[ {npcName} ]</div>
 
             <div style={contentStyle}>
                 {/* key를 displayText로 주어 텍스트가 바뀔 때마다 다시 타이핑 효과 발생 */}
@@ -110,11 +132,13 @@ export default function DialogueBox({ text, isOpen, onClose, npcName = "주민",
             </div>
 
             <div style={footerStyle}>닫기: ESC 또는 바깥 클릭</div>
-        </div>
+            </div>
+        </>
     );
 }
 
 // --- 스타일 정의 (기존과 동일) ---
+const overlayStyle = { position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 999 };
 const containerStyle = { position: 'absolute', bottom: '40px', left: '50%', transform: 'translateX(-50%)', width: '90%', maxWidth: '740px', minHeight: '200px', backgroundColor: 'rgba(20, 20, 25, 0.95)', border: '4px solid #ffffff', borderRadius: '4px', color: '#ffffff', padding: '25px', fontSize: '22px', fontFamily: '"Press Start 2P", monospace', zIndex: 1000, boxShadow: '0 0 0 4px #000, 0 10px 20px rgba(0,0,0,0.5)' };
 const nameTagStyle = { color: '#ffcc00', marginBottom: '12px', fontWeight: 'bold', fontSize: '18px' };
 const contentStyle = { lineHeight: '1.5', minHeight: '60px', marginBottom: '15px' };
