@@ -13,27 +13,30 @@ export default function LoginPage() {
         setLoading(true);
 
         try {
-            // 1. 내가 만든 Next.js API(/api/members/login)를 호출합니다.
-            // 상대 경로 사용으로 EC2 환경에서도 동작
+            // Next.js API 호출 (쿠키 저장 포함)
             const res = await fetch('/api/members/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
             });
 
-            const data = await res.json();
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) {
+                const errorMsg = data?.error || data?.message || '로그인 실패. 이메일 또는 비밀번호를 확인하세요.';
+                setError(errorMsg);
+                console.error('로그인 실패:', JSON.stringify(data));
+                return;
+            }
 
-            if (res.ok && data.id) {
+            // 로그인 성공 → 일부 정보만 localStorage에 저장
+            // (토큰은 HTTP only 쿠키로 관리)
+            if (data.id && data.nickname) {
                 localStorage.setItem('memberId', data.id);
                 localStorage.setItem('nickname', data.nickname);
-                alert(`${data.nickname}님, 환영합니다!`);
-                window.location.href = '/';
-            } else {
-                // 에러 메시지 표시
-                const errorMsg = data.error || data.message || '로그인 실패. 이메일 또는 비밀번호를 확인하세요.';
-                setError(errorMsg);
-                console.error('로그인 실패:', data);
             }
+
+            alert(`${data.nickname || '회원'}님, 환영합니다!`);
+            window.location.href = '/'; // 메인 페이지 이동
         } catch (err) {
             setError('서버 연결 실패. 잠시 후 다시 시도하세요.');
             console.error('로그인 에러:', err);
@@ -46,7 +49,6 @@ export default function LoginPage() {
         <div style={{ padding: '40px', maxWidth: '300px', margin: '0 auto', textAlign: 'center' }}>
             <h1>🔑 로그인</h1>
 
-            {/* 에러 메시지 표시 */}
             {error && (
                 <div style={{
                     marginBottom: '15px',
@@ -66,7 +68,8 @@ export default function LoginPage() {
                     placeholder="이메일"
                     required
                     style={{ padding: '10px' }}
-                    onChange={(e) => setForm({...form, email: e.target.value})}
+                    value={form.email}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
                     disabled={loading}
                 />
                 <input
@@ -74,7 +77,8 @@ export default function LoginPage() {
                     placeholder="비밀번호"
                     required
                     style={{ padding: '10px' }}
-                    onChange={(e) => setForm({...form, password: e.target.value})}
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
                     disabled={loading}
                 />
                 <button
@@ -92,6 +96,7 @@ export default function LoginPage() {
                     {loading ? '로그인 중...' : '입장하기'}
                 </button>
             </form>
+
             <p style={{ marginTop: '20px', fontSize: '14px' }}>
                 처음 오셨나요? <a href="/members/signup">주민 등록하기</a>
             </p>
