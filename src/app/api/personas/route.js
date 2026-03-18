@@ -1,3 +1,5 @@
+
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080';
@@ -15,9 +17,16 @@ export async function GET(request) {
             );
         }
 
+        // next/headers의 cookies()는 Promise를 반환할 수 있으므로 await로 해제
+        const cookieStore = await cookies();
+        const accessToken = cookieStore.get('accessToken')?.value || '';
+
         const res = await fetch(`${BACKEND_URL}/api/personas/member/${memberId}`, {
             method: 'GET',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                ...(accessToken ? { 'Authorization': `Bearer ${accessToken}` } : {})
+            },
         });
 
         const data = await res.json();
