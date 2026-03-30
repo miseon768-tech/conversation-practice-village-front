@@ -16,6 +16,7 @@ export default function SignupPage() {
         // 우리가 만든 Next.js API(/api/members)를 호출합니다.
         const res = await fetch('/api/members', {
             method: 'POST',
+            credentials: 'same-origin',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(form),
         });

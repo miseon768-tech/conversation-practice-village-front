@@ -25,21 +25,22 @@ export async function POST() {
     }
 
     // 새 토큰 쿠키에 저장
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+        httpOnly: true,
+        path: '/',
+        maxAge: 60 * 30,
+        sameSite: isProd ? 'none' : 'lax',
+        secure: isProd
+    };
+
     const response = NextResponse.json({
         message: '토큰 재발급 성공',
         id: data.id,
         nickname: data.nickname,
     });
-    response.cookies.set('accessToken', data.accessToken, {
-        httpOnly: true,
-        path: '/',
-        maxAge: 60 * 30,
-    });
-    response.cookies.set('refreshToken', data.refreshToken, {
-        httpOnly: true,
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-    });
+    response.cookies.set('accessToken', data.accessToken, cookieOptions);
+    response.cookies.set('refreshToken', data.refreshToken, { ...cookieOptions, maxAge: 60 * 60 * 24 * 7 });
     return response;
 }
 

@@ -49,7 +49,7 @@ export default function PhaserGame({ onSpacePress, memberId }) {
 
                     // 2. 서버에서 등록된 주민 리스트 가져와서 NPC에 입히기
                     if (memberId) {
-                        fetch(`/api/personas?memberId=${memberId}`)
+                        fetch(`/api/personas?memberId=${memberId}`, { credentials: 'include' })
                             .then(res => res.json())
                             .then(data => {
                                 this.npcs.getChildren().forEach(npc => {

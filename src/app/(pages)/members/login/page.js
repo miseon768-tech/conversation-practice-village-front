@@ -16,6 +16,7 @@ export default function LoginPage() {
             // Next.js API 호출 (쿠키 저장 포함)
             const res = await fetch('/api/members/login', {
                 method: 'POST',
+                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(form),
             });

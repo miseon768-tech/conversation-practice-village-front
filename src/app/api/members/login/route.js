@@ -35,18 +35,18 @@ export async function POST(request) {
             nickname: data.nickname
         });
 
-        // 쿠키에 accessToken / refreshToken 저장 (HTTP only)
-        response.cookies.set('accessToken', data.accessToken, {
+        // 쿠키 옵션: 프로덕션(도메인이 다른 경우)에는 SameSite=None + Secure 필요
+        const isProd = process.env.NODE_ENV === 'production';
+        const cookieOptions = {
             httpOnly: true,
             path: '/',
-            maxAge: 60 * 30, // 30분
-        });
+            maxAge: 60 * 30,
+            sameSite: isProd ? 'none' : 'lax',
+            secure: isProd
+        };
 
-        response.cookies.set('refreshToken', data.refreshToken, {
-            httpOnly: true,
-            path: '/',
-            maxAge: 60 * 60 * 24 * 7, // 7일
-        });
+        response.cookies.set('accessToken', data.accessToken, cookieOptions);
+        response.cookies.set('refreshToken', data.refreshToken, { ...cookieOptions, maxAge: 60 * 60 * 24 * 7 });
 
         console.log('로그인 성공, 쿠키에 토큰 저장 완료');
         return response;

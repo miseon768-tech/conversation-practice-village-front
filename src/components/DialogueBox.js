@@ -63,8 +63,13 @@ const DialogueBox = forwardRef(function DialogueBox({ text, isOpen, onClose, npc
             if (!currentId) {
                 const convRes = await fetch(`/api/conversations/persona/${personaId}`, {
                     method: 'POST',
+                    credentials: 'include',
                 });
-                if (!convRes.ok) throw new Error("대화방 세션 확보 실패");
+                if (!convRes.ok) {
+                    setDisplayText("대화방 세션 확보 실패");
+                    setIsLoading(false);
+                    return;
+                }
 
                 currentId = await convRes.json();
                 setConversationId(currentId);
@@ -73,6 +78,7 @@ const DialogueBox = forwardRef(function DialogueBox({ text, isOpen, onClose, npc
             // 2. 메시지 전송 (백엔드 ChatResponse.reply 필드와 매칭)
             const res = await fetch(`/api/messages/${currentId}`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: messageToSend })
             });

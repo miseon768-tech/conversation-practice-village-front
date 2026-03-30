@@ -8,12 +8,12 @@ export default function FollowPage() {
 
     useEffect(() => {
         // 1. 내가 팔로우하는 목록 가져오기 (memberId 1번 가정)
-        fetch('/api/follows?followerId=1')
+        fetch('/api/follows?followerId=1', { credentials: 'include' })
             .then(res => res.json())
             .then(data => setFollowing(data));
 
         // 2. 나를 팔로우하는 목록 가져오기
-        fetch('/api/follows?followingId=1')
+        fetch('/api/follows?followingId=1', { credentials: 'include' })
             .then(res => res.json())
             .then(data => setFollowers(data));
     }, []);
@@ -21,6 +21,8 @@ export default function FollowPage() {
     const handleFollow = async (targetId) => {
         const res = await fetch('/api/follows', {
             method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ follower_id: 1, following_id: targetId }),
         });
         if (res.ok) {
@@ -56,7 +58,7 @@ export default function FollowPage() {
                         {following.length > 0 ? following.map(f => (
                             <div key={f.id} style={{ padding: '15px', borderBottom: '1px solid #eee', display: 'flex', justifyContent: 'space-between' }}>
                                 <span>ID: {f.following_id} 트레이너</span>
-                                <button style={{ fontSize: '12px', color: 'red', border: 'none', background: 'none' }}>언팔로우</button>
+                                <button onClick={() => handleFollow(f.following_id)} style={{ fontSize: '12px', color: 'red', border: 'none', background: 'none' }}>언팔로우</button>
                             </div>
                         )) : <p style={{ padding: '15px', color: '#888' }}>아직 팔로우하는 이웃이 없습니다.</p>}
                     </div>

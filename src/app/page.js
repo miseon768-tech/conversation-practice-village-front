@@ -48,7 +48,7 @@ export default function Home() {
             setMode('TALK');
 
             try {
-                const res = await fetch(`/api/personas/${personaId}`);
+                const res = await fetch(`/api/personas/${personaId}`, { credentials: 'include' });
                 if (res.ok) {
                     const data = await res.json();
                     setFormData(data);
@@ -70,6 +70,7 @@ export default function Home() {
         try {
             const res = await fetch(`/api/personas`, {
                 method: 'POST',
+                credentials: 'include',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     memberId: currentMemberId,
@@ -78,7 +79,10 @@ export default function Home() {
                 })
             });
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error || "등록 실패");
+            if (!res.ok) {
+                alert(data.error || "등록 실패");
+                return;
+            }
 
             alert("새로운 주민이 마을에 합류했습니다!");
             window.location.reload(); // 월드 갱신을 위해 새로고침
